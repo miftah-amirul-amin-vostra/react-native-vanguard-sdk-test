@@ -4,8 +4,8 @@ import android.widget.Toast
 import android.util.Log
 import com.facebook.react.bridge.*
 import id.co.vostra.vanguard.dpc.Vanguard_SDK
-import id.co.vostra.vanguard.sdk.VanguardService
-import id.co.vostra.vanguard.sdk.VanguardServiceCallback
+import id.co.vostra.vanguard.sdk.VanguardAgent
+import id.co.vostra.vanguard.sdk.VanguardAgentCallback
 
 class VanguardModule(private val reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
@@ -14,8 +14,8 @@ class VanguardModule(private val reactContext: ReactApplicationContext) :
     private var isConnected = false
 
     init {
-        val service = VanguardService(reactContext)
-        service.connectToService(object : VanguardServiceCallback {
+        val service = VanguardAgent(reactContext)
+        service.connectToVanguardAgent(object : VanguardAgentCallback {
             override fun onConnected(sdk: Vanguard_SDK) {
                 vanguardSdk = sdk
                 isConnected = true
@@ -65,6 +65,21 @@ class VanguardModule(private val reactContext: ReactApplicationContext) :
                 promise.resolve(serial)
                 Toast.makeText(reactContext, "Serial: $serial", Toast.LENGTH_SHORT).show()
                 Log.d("VanguardModule", "getDeviceSerialNumber: $serial")
+            } catch (e: Exception) {
+                promise.reject("ERROR", e)
+            }
+        } else {
+            promise.reject("NOT_CONNECTED", "Service not connected")
+        }
+    }
+    @ReactMethod
+    fun getImei(promise: Promise) {
+        if (vanguardSdk != null) {
+            try {
+                val imei = vanguardSdk?.imei ?: "null"
+                promise.resolve(imei)
+                Toast.makeText(reactContext, "Imei: $imei", Toast.LENGTH_SHORT).show()
+                Log.d("VanguardModule", "getImei: $imei")
             } catch (e: Exception) {
                 promise.reject("ERROR", e)
             }

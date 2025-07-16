@@ -8,12 +8,14 @@ const { VanguardModule } = NativeModules as {
     isSdkReady: () => Promise<boolean>;
     getWifiMacAddress: () => Promise<string>;
     getDeviceSerialNumber: () => Promise<string>;
+    getImei: () => Promise<string>;
   };
 };
 
 export default function App() {
   const [wifiMac, setWifiMac] = useState<string>('Belum diambil');
-  const [serialNumber, setSerialNumber] = useState<string>('Belum diambil');
+  const [serialNumber, setSerialNumber, ] = useState<string>('Belum diambil');
+  const [imei, setImei] = useState<string>('Belum diambil');
   const [sdkReady, setSdkReady] = useState<boolean>(false);
 
   useEffect(() => {
@@ -49,6 +51,15 @@ export default function App() {
     }
   };
 
+    const handleGetImei = async () => {
+    try {
+      const imei = await VanguardModule.getImei();
+      setImei(imei);
+    } catch (e: any) {
+      setImei('Error: ' + e.message);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.statusText}>
@@ -62,6 +73,10 @@ export default function App() {
       <Text style={styles.label}>Device Serial Number:</Text>
       <Text style={styles.text}>{serialNumber}</Text>
       <Button title="Ambil Serial Number" onPress={handleGetSerialNumber} />
+
+      <Text style={styles.label}>Device Imei:</Text>
+      <Text style={styles.text}>{imei}</Text>
+      <Button title="Ambil Imei" onPress={handleGetImei} />
     </View>
   );
 }
